@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FORTOX · Resultados del piloto · OnTrack</title>
+<meta name="description" content="Qué midió OnTrack en el piloto de FORTOX: 30 recorridos, 3 vehículos, 129 excesos de velocidad con hora, lugar y duración." />
+<link rel="icon" href="assets/ontrack-icon.png" />
+<style>
+  @font-face{font-family:'Montserrat';src:url('fonts/montserrat-400.woff2') format('woff2');font-weight:400;font-display:swap}
+  @font-face{font-family:'Montserrat';src:url('fonts/montserrat-500.woff2') format('woff2');font-weight:500;font-display:swap}
+  @font-face{font-family:'Montserrat';src:url('fonts/montserrat-600.woff2') format('woff2');font-weight:600;font-display:swap}
+  @font-face{font-family:'Montserrat';src:url('fonts/montserrat-700.woff2') format('woff2');font-weight:700;font-display:swap}
+  @font-face{font-family:'Montserrat';src:url('fonts/montserrat-800.woff2') format('woff2');font-weight:800;font-display:swap}
+  @font-face{font-family:'Anybody';src:url('fonts/anybody-700.woff2') format('woff2');font-weight:700;font-display:swap}
+  @font-face{font-family:'Anybody';src:url('fonts/anybody-800.woff2') format('woff2');font-weight:800;font-display:swap}
+  @font-face{font-family:'Anybody';src:url('fonts/anybody-700-italic.woff2') format('woff2');font-weight:700;font-style:italic;font-display:swap}
+
+  :root{
+    /* Marca OnTrack */
+    --green:#01a532; --green-2:#26bc30; --green-bright:#23ec00; --green-deep:#1a5100;
+    /* Tinta y superficies */
+    --ink:#151e17; --ink-2:#3c4442; --muted:#7d8481;
+    --surface:#ffffff; --plane:#f6f8f7; --line:#e4eae8; --grid:#eceeec; --axis:#c9d1ce;
+    /* Series categóricas — la identidad del vehículo, fija en todo el tablero.
+       Orden validado (CVD ΔE 9.2 all-pairs, luz) — ver notas metodológicas. */
+    --v-dnt:#2a78d6; --v-bkg:#eb6834; --v-axd:#1baf7a;
+    /* Rampa ordinal de severidad (un solo tono, claro→oscuro) */
+    --sev-1:#eba47a; --sev-2:#e08149; --sev-3:#c85f1e; --sev-4:#9c3b0b;
+    /* Estado (icono + rótulo siempre acompañan al color) */
+    --st-good:#0ca30c; --st-warn:#fab219; --st-serious:#ec835a; --st-crit:#d03b3b;
+    --sans:'Montserrat',system-ui,-apple-system,"Segoe UI",sans-serif;
+    --accent:'Anybody','Montserrat',system-ui,sans-serif;
+    --r:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);color:var(--ink);background:var(--plane);font-size:15px;line-height:1.55;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:22px 20px 64px}
+  a{color:var(--green-deep)}
+
+  /* ── Encabezado ─────────────────────────────────────────── */
+  .head{display:flex;align-items:center;gap:18px;padding:20px 24px;border-radius:var(--r);color:#fff;
+    background:linear-gradient(122deg,var(--green-bright),var(--green-2) 48%,var(--green));position:relative;overflow:hidden}
+  .head::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(420px 200px at 88% -30%,rgba(255,255,255,.24),transparent 62%)}
+  .head .logo{flex:0 0 auto;background:#fff;border-radius:14px;padding:13px 18px;display:flex;align-items:center}
+  .head .logo img{height:38px;width:auto;display:block}
+  .head .txt{flex:1;min-width:0;position:relative}
+  .kicker{font-family:var(--accent);font-weight:700;font-style:italic;font-size:11px;letter-spacing:.6px;
+    text-transform:uppercase;opacity:.95}
+  .head h1{font-family:var(--accent);font-weight:800;font-size:26px;line-height:1.12;letter-spacing:-.4px;margin-top:3px}
+  .head .sub{font-size:13.5px;font-weight:500;opacity:.96;margin-top:5px;max-width:62ch}
+  .head .stamp{flex:0 0 auto;text-align:right;position:relative;font-size:12px;font-weight:600;line-height:1.5;opacity:.95}
+  .head .stamp b{display:block;font-family:var(--accent);font-weight:800;font-size:14px}
+  .tools{display:flex;gap:8px;margin-top:10px;justify-content:flex-end}
+  .tools button{font:inherit;font-size:11.5px;font-weight:700;color:#fff;background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.42);border-radius:999px;padding:5px 12px;cursor:pointer}
+  .tools button:hover{background:rgba(255,255,255,.28)}
+  .tools button[aria-pressed="true"]{background:#fff;color:var(--green-deep);border-color:#fff}
+
+  /* ── Navegación ─────────────────────────────────────────── */
+  nav.anchors{position:sticky;top:0;z-index:40;margin:10px 0 0;padding:9px 4px;background:rgba(246,248,247,.94);
+    backdrop-filter:blur(6px);border-bottom:1px solid var(--line);display:flex;gap:6px;flex-wrap:wrap}
+  nav.anchors a{font-size:12px;font-weight:700;color:var(--ink-2);text-decoration:none;padding:5px 11px;
+    border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+  nav.anchors a:hover{border-color:var(--green-2);color:var(--green-deep)}
+
+  /* ── Secciones y tarjetas ───────────────────────────────── */
+  section{margin-top:30px;scroll-margin-top:64px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+  .sec-h h2{font-family:var(--accent);font-weight:800;font-size:19px;letter-spacing:-.2px;color:var(--ink)}
+  .sec-h .n{font-family:var(--accent);font-weight:800;font-size:12px;color:var(--green);
+    border:1.5px solid var(--green-2);border-radius:8px;padding:1px 7px;flex:0 0 auto}
+  .sec-sub{font-size:13.5px;color:var(--ink-2);max-width:88ch;margin-bottom:14px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .g21{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+  .grid.top{align-items:start}
+  @media (max-width:900px){.g2,.g3,.g4,.g21{grid-template-columns:1fr}}
+
+  /* ── Héroe ──────────────────────────────────────────────── */
+  .hero{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:22px;align-items:center}
+  @media (max-width:900px){.hero{grid-template-columns:1fr}}
+  .hero .fig{font-family:var(--accent);font-weight:800;font-size:74px;line-height:.92;color:var(--green-deep);
+    letter-spacing:-2px}
+  .hero .fig-l{font-size:14px;font-weight:700;color:var(--ink);margin-top:6px}
+  .hero p{font-size:14px;color:var(--ink-2);margin-top:10px}
+  .hero .strong{font-weight:700;color:var(--ink)}
+
+  /* ── Fichas de cifra ────────────────────────────────────── */
+  .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  @media (max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .tile{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--green-2);
+    border-radius:12px;padding:12px 14px}
+  .tile .v{font-family:var(--accent);font-weight:800;font-size:27px;line-height:1;color:var(--green-deep)}
+  .tile .v small{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--ink-2);margin-left:3px}
+  .tile .l{font-size:11.8px;font-weight:600;color:var(--muted);margin-top:6px;line-height:1.4}
+  .tile.alt{border-left-color:var(--sev-3)}
+  .tile.alt .v{color:var(--sev-4)}
+
+  /* ── Gráficos ───────────────────────────────────────────── */
+  .chart{margin-top:2px}
+  .chart h3{font-family:var(--accent);font-weight:700;font-size:14.5px;color:var(--ink)}
+  .chart .cap{font-size:12.4px;color:var(--muted);margin:2px 0 10px;line-height:1.45}
+  .chart svg{display:block;width:100%;height:auto;overflow:visible}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px;font-weight:600;color:var(--ink-2)}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}
+  .legend .dim{color:var(--muted);font-weight:500}
+  .note{font-size:12.4px;color:var(--ink-2);background:#f4f9f5;border-left:3px solid var(--green-2);
+    border-radius:0 8px 8px 0;padding:9px 12px;margin-top:12px}
+  .note.warn{background:#fff8ec;border-left-color:var(--st-warn)}
+  .note b{color:var(--ink)}
+
+  details{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+  details summary{font-size:12px;font-weight:700;color:var(--green-deep);cursor:pointer;list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▸ ";font-size:10px}
+  details[open] summary::before{content:"▾ "}
+  .tbl-scroll{overflow-x:auto;margin-top:10px;max-height:420px;overflow-y:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.2px}
+  th{text-align:left;font-size:10.6px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);
+    padding:0 10px 6px;border-bottom:1.5px solid var(--line);position:sticky;top:0;background:var(--surface)}
+  td{padding:6px 10px;border-bottom:1px solid var(--grid);vertical-align:top;color:var(--ink-2)}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tbody tr:nth-child(even) td{background:#fbfcfb}
+  td b{color:var(--ink)}
+
+  .chip{display:inline-block;white-space:nowrap;padding:2px 8px;border-radius:999px;font-size:10.5px;
+    font-weight:800;letter-spacing:.3px}
+  .chip--good{background:#e7f7e7;color:#0a6d0a}
+  .chip--warn{background:#fff4d9;color:#7a5800}
+  .chip--serious{background:#fdeee7;color:#8d3f18}
+  .chip--crit{background:#fdeaea;color:#8f1f1f}
+  .chip--off{background:#eef1f0;color:var(--muted)}
+  .dot{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}
+
+  /* Barra de composición (parte-todo) */
+  .stack{display:flex;gap:2px;margin-top:8px}
+  .stack span{height:26px;border-radius:3px;display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:800;color:#fff}
+  .stack span:first-child{border-radius:7px 3px 3px 7px}
+  .stack span:last-child{border-radius:3px 7px 7px 3px}
+
+  /* Lista de valor */
+  .vlist{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  @media (max-width:900px){.vlist{grid-template-columns:1fr}}
+  .vitem{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:var(--surface)}
+  .vitem h4{font-family:var(--accent);font-weight:700;font-size:13.5px;color:var(--green-deep);margin-bottom:5px}
+  .vitem p{font-size:12.8px;color:var(--ink-2)}
+  .vitem .ev{display:block;margin-top:7px;padding-top:7px;border-top:1px dashed var(--line);
+    font-size:11.8px;font-weight:700;color:var(--ink)}
+
+  /* Mapa */
+  .maprow{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;align-items:start}
+  @media (max-width:760px){.maprow{grid-template-columns:1fr}}
+  .mapbox{position:relative;width:300px;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    background:#f5f5f3}
+  .mapbox img{display:block;width:300px;height:auto}
+  .mapbox svg{position:absolute;inset:0;width:100%;height:100%}
+  .mapbox .via{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.92);border:1px solid var(--line);
+    border-radius:8px;padding:4px 8px;font-size:10.5px;font-weight:800;color:var(--ink);letter-spacing:.2px}
+  .inset{position:relative;width:238px;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+    background:#f5f5f3;margin-top:4px}
+  .inset img{display:block;width:238px;height:auto}
+  .inset svg{position:absolute;inset:0;width:100%;height:100%}
+  .attrib{font-size:9.8px;color:#a9b0ad;margin-top:6px;line-height:1.4}
+  .attrib a{color:#a9b0ad;text-decoration:none}
+  .mapside{display:grid;grid-template-columns:minmax(0,1fr) 238px;gap:20px;align-items:start}
+  @media (max-width:1000px){.mapside{grid-template-columns:1fr}}
+  .hotlist{font-size:12.4px}
+  .hotlist li{list-style:none;display:flex;align-items:baseline;gap:9px;padding:7px 0;border-bottom:1px solid var(--grid)}
+  .hotlist .rank{font-weight:800;font-size:12px;color:var(--green);width:20px;flex:0 0 auto;
+    font-variant-numeric:tabular-nums}
+  .hotlist .meta{flex:1;min-width:0}
+  .hotlist .meta b{display:block;font-size:12.6px;color:var(--ink)}
+  .hotlist .meta span{color:var(--muted);font-size:11.6px}
+  .hotlist a{font-size:11.4px;font-weight:700;text-decoration:none;border:1px solid var(--line);border-radius:999px;
+    padding:3px 9px;white-space:nowrap}
+  .hotlist a:hover{border-color:var(--green-2)}
+
+  /* Tooltip */
+  .tip{position:fixed;z-index:90;pointer-events:none;opacity:0;transition:opacity .1s;
+    background:var(--ink);color:#fff;font-size:11.8px;font-weight:600;line-height:1.45;
+    padding:7px 10px;border-radius:8px;max-width:250px;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+  .tip b{font-family:var(--accent);font-weight:800;display:block;font-size:12.5px;margin-bottom:2px}
+  .tip em{font-style:normal;color:#c9f5cd;font-weight:700}
+
+  footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);display:flex;gap:18px;
+    align-items:flex-end;justify-content:space-between;font-size:11.8px;color:var(--muted);font-weight:500}
+  footer img{height:38px;opacity:.9}
+
+  @media print{
+    body{background:#fff;font-size:10.5px}
+    .wrap{max-width:none;padding:0}
+    nav.anchors,.tools{display:none}
+    section{break-inside:avoid;margin-top:16px}
+    .card,.tile,.vitem{break-inside:avoid}
+    details{display:none}
+    @page{size:A4;margin:10mm}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="head">
+    <div class="logo"><img src="assets/ontrack-logo.png" alt="OnTrack" /></div>
+    <div class="txt">
+      <span class="kicker">Piloto de operación · FORTOX</span>
+      <h1>Lo que ya se está midiendo</h1>
+      <p class="sub">Resultados reales del piloto: 30 recorridos en 3 vehículos, con la evidencia
+        de velocidad, conducción, cumplimiento de chequeos y trazabilidad que la plataforma
+        deja registrada de forma automática.</p>
+    </div>
+    <div class="stamp">
+      <b id="stampDate">20 de agosto de 2026</b>
+      <span id="stampRange">Datos del 1 de junio al 19 de agosto</span>
+      <div class="tools">
+        <button id="btnPrint" title="Guardar como PDF">Imprimir / PDF</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="anchors" aria-label="Secciones">
+    <a href="#resumen">Resumen</a>
+    <a href="#operacion">Operación medida</a>
+    <a href="#velocidad">Velocidad</a>
+    <a href="#mapa">Dónde ocurre</a>
+    <a href="#conductores">Conductores</a>
+    <a href="#calidad">Calidad del dato</a>
+    <a href="#valor">Qué habilita</a>
+    <a href="#notas">Metodología</a>
+  </nav>
+
+  <!-- ══ 1. RESUMEN ══════════════════════════════════════ -->
+  <section id="resumen">
+    <div class="sec-h"><span class="n">01</span><h2>El titular del piloto</h2></div>
+    <p class="sec-sub">Con tres vehículos y cuatro conductores, la plataforma produjo un
+      expediente de operación que antes no existía: cada evento con placa, hora exacta,
+      coordenada, duración y velocidad máxima.</p>
+
+    <div class="card hero">
+      <div>
+        <div class="fig" id="heroFig">129</div>
+        <div class="fig-l">excesos de velocidad documentados<br />uno por uno, con hora, lugar y duración</div>
+      </div>
+      <div>
+        <p>Ninguno de estos eventos habría quedado registrado sin la plataforma. Cada uno trae
+          <span class="strong">placa, fecha y hora exacta, coordenada de inicio y fin, duración
+          en segundos y velocidad máxima</span> — es decir, evidencia verificable, no percepción.</p>
+        <p style="margin-top:12px">Los 129 eventos suman <span class="strong" id="heroMin">97 minutos</span>
+          por encima del umbral de 60 km/h y <span class="strong" id="heroKm">107,5 km</span>
+          recorridos en exceso. El pico llegó a <span class="strong" id="heroMax">81 km/h</span>.</p>
+      </div>
+    </div>
+
+    <div class="tiles" style="margin-top:14px" id="tilesMain"></div>
+
+    <div class="note"><b>Dos ventanas de medición, a propósito.</b> Los excesos de velocidad
+      corresponden al reporte del <b>1 de junio al 23 de julio</b> (línea base de riesgo). Los
+      recorridos, los chequeos y el ranking corresponden al periodo del piloto,
+      <b>21 de julio al 19 de agosto</b>. Se presentan por separado porque miden cosas distintas
+      en momentos distintos; mezclarlas daría un promedio que no describe ninguna de las dos.</div>
+  </section>
+
+  <!-- ══ 2. OPERACIÓN ════════════════════════════════════ -->
+  <section id="operacion">
+    <div class="sec-h"><span class="n">02</span><h2>La operación quedó medida</h2></div>
+    <p class="sec-sub">30 recorridos ejecutados en 18 días de operación, con inicio, fin,
+      duración, conductor y vehículo. Es la base sobre la que se puede auditar cualquier día
+      del mes hacia atrás.</p>
+
+    <div class="grid g21 top">
+      <div class="card chart">
+        <h3>Recorridos ejecutados por día</h3>
+        <p class="cap">Cada columna es un día con operación registrada; el color identifica el vehículo.</p>
+        <div id="chRecDia"></div>
+        <div class="legend" id="lgRecDia"></div>
+        <details><summary>Ver tabla de los 30 recorridos</summary>
+          <div class="tbl-scroll" id="tblRec"></div>
+        </details>
+      </div>
+      <div class="card chart">
+        <h3>Por vehículo</h3>
+        <p class="cap">Recorridos, horas de operación válidas y conductor asignado.</p>
+        <div id="chRecVeh"></div>
+        <details><summary>Ver tabla</summary><div class="tbl-scroll" id="tblRecVeh"></div></details>
+      </div>
+    </div>
+
+    <div class="tiles" style="margin-top:14px" id="tilesOp"></div>
+  </section>
+
+  <!-- ══ 3. VELOCIDAD ════════════════════════════════════ -->
+  <section id="velocidad">
+    <div class="sec-h"><span class="n">03</span><h2>Velocidad: el riesgo con nombre y hora</h2></div>
+    <p class="sec-sub">129 eventos por encima de 60 km/h. Lo valioso no es el total: es que
+      el total se descompone y señala exactamente dónde intervenir.</p>
+
+    <div class="grid g2">
+      <div class="card chart">
+        <h3>El 96,9 % de los excesos está en un solo vehículo</h3>
+        <p class="cap">Eventos por placa, 1 de junio – 23 de julio. Umbral 60 km/h.</p>
+        <div id="chExVeh"></div>
+        <div class="legend" id="lgVeh"></div>
+        <div class="note"><b>Esto es gestión por excepción.</b> No hay que intervenir la flota:
+          hay que intervenir un vehículo y un turno. Sin la medición, el hallazgo se habría
+          repartido como "problema general de la operación".</div>
+        <details><summary>Ver tabla</summary><div class="tbl-scroll" id="tblExVeh"></div></details>
+      </div>
+      <div class="card chart">
+        <h3>Casi todo ocurre en dos franjas del día</h3>
+        <p class="cap">Eventos por hora de inicio (0–23 h). El 93,8 % cae en las 6 a.m. y las 4 p.m.</p>
+        <div id="chExHora"></div>
+        <div class="note"><b>Las dos franjas coinciden con los cambios de turno.</b> Es un patrón
+          horario, no un conductor imprudente todo el día: la charla de seguridad y el control
+          tienen una hora concreta a la cual apuntar.</div>
+        <details><summary>Ver tabla</summary><div class="tbl-scroll" id="tblExHora"></div></details>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:14px">
+      <div class="card chart">
+        <h3>Intensidad por día</h3>
+        <p class="cap">Días con al menos un evento. El eje es una secuencia de días medidos, no una
+          línea de tiempo continua: entre el 11/06 y el 23/07 no hay días con eventos en el reporte.</p>
+        <div id="chExDia"></div>
+        <details><summary>Ver tabla</summary><div class="tbl-scroll" id="tblExDia"></div></details>
+      </div>
+      <div class="card chart">
+        <h3>Qué tan lejos del umbral</h3>
+        <p class="cap">Velocidad máxima alcanzada en cada evento, agrupada. Umbral 60 km/h.</p>
+        <div id="chExVel"></div>
+        <div class="note"><b>El 90,7 % de los eventos está entre 61 y 75 km/h.</b> Es exceso
+          sostenido de vía rápida, no una carrera puntual: se corrige con control de ruta y
+          hábito, y la plataforma permite verificar si bajó.</div>
+        <details><summary>Ver tabla</summary><div class="tbl-scroll" id="tblExVel"></div></details>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3 style="font-family:var(--accent);font-weight:700;font-size:14.5px">Los 10 eventos más severos</h3>
+      <p class="cap" style="font-size:12.4px;color:var(--muted);margin:2px 0 6px">
+        Ordenados por velocidad máxima. Cada uno abre el punto exacto en el mapa.</p>
+      <div class="tbl-scroll" id="tblTop"></div>
+    </div>
+  </section>
+
+  <!-- ══ 4. MAPA ═════════════════════════════════════════ -->
+  <section id="mapa">
+    <div class="sec-h"><span class="n">04</span><h2>Dónde ocurre: 12,5 km explican casi todo</h2></div>
+    <p class="sec-sub">Al agrupar los 129 eventos por cercanía geográfica aparecen 32 puntos
+      recurrentes, y 122 de ellos (94,6 %) caen sobre un mismo tramo de la Autopista Norte, entre
+      Chía y Cajicá: unos 12,5 km de vía.</p>
+
+    <div class="card maprow">
+      <div>
+        <div class="mapbox" id="mapCorredor">
+          <img src="assets/mapa-corredor.png" alt="Mapa del corredor Chía – Cajicá con los puntos de exceso de velocidad" />
+          <span class="via">Autopista Norte · Chía → Cajicá</span>
+        </div>
+        <p class="attrib">Cartografía © <a href="https://www.openstreetmap.org/copyright"
+          target="_blank" rel="noopener">OpenStreetMap</a> · teselas © CARTO.
+          Puntos ubicados con las coordenadas del reporte.</p>
+      </div>
+      <div>
+        <h3 style="font-family:var(--accent);font-weight:700;font-size:14.5px">Puntos recurrentes de exceso</h3>
+        <p class="cap">Cada círculo agrupa los eventos ocurridos en un radio de ~330 m; el área
+          del círculo es la cantidad de eventos. El norte está arriba.</p>
+        <div class="mapside">
+          <div>
+            <ul class="hotlist" id="hotList"></ul>
+            <div class="note"><b>Un corredor, no una ciudad entera.</b> Con los ocho puntos de
+              arriba se cubre más de la mitad de los eventos: son ocho lugares concretos para
+              señalizar, reforzar en la inducción y vigilar, no un problema difuso.</div>
+          </div>
+          <div>
+            <h4 style="font-family:var(--accent);font-weight:700;font-size:12px;color:var(--ink-2);
+              margin-bottom:6px">Dónde queda ese tramo</h4>
+            <div class="inset" id="mapContexto">
+              <img src="assets/mapa-contexto.png" alt="Mapa de contexto: el corredor al norte de Bogotá" />
+            </div>
+            <p class="attrib">El recuadro verde es el tramo del mapa grande. Los 7 eventos
+              restantes ocurrieron en Bogotá y en el corredor occidental
+              (<span style="color:var(--sev-3);font-weight:800">•</span>).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 5. CONDUCTORES ══════════════════════════════════ -->
+  <section id="conductores">
+    <div class="sec-h"><span class="n">05</span><h2>Ranking de conductores</h2></div>
+    <p class="sec-sub">La plataforma califica a cada conductor con cuatro señales objetivas:
+      excesos de velocidad, giros y frenadas bruscas, formularios de chequeo diligenciados y
+      puntualidad al diligenciarlos. El puntaje es comparable entre personas y entre periodos.</p>
+
+    <div class="grid g21">
+      <div class="card chart">
+        <h3>Puntaje por conductor</h3>
+        <p class="cap">Escala 0 a 5. Periodo del piloto: 21 de julio – 19 de agosto.</p>
+        <div id="chRank"></div>
+        <div class="legend" id="lgRank"></div>
+      </div>
+      <div class="card">
+        <h3 style="font-family:var(--accent);font-weight:700;font-size:14.5px">Cómo leer los ceros</h3>
+        <p style="font-size:13px;color:var(--ink-2);margin-top:8px">
+          Dos conductores aparecen con métricas en cero o casi en cero:
+          <b id="offNames">Lorenzo Cabrera Gómez</b> con 2 formularios y
+          <b id="offNames2">Robinson Rodallega Balanta</b> sin actividad.
+        </p>
+        <p style="font-size:13px;color:var(--ink-2);margin-top:10px">
+          <b>No es un mal desempeño: es que no participaron en la prueba.</b> Fueron creados en la
+          plataforma para tener la nómina completa, pero durante el piloto no se les asignó
+          operación como a los otros tres. Sin recorridos ni chequeos no hay nada que calificar,
+          y el puntaje lo refleja tal cual.
+        </p>
+        <div class="note"><b>Y eso también es información.</b> El tablero distingue
+          "conductor con buen comportamiento" de "conductor sin datos". Confundir ambos es
+          justamente lo que ocurre cuando el seguimiento se hace en papel.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3 style="font-family:var(--accent);font-weight:700;font-size:14.5px">Detalle del ranking</h3>
+      <div class="tbl-scroll" id="tblRank" style="max-height:none"></div>
+      <p class="cap" style="margin-top:10px">Giros/frenadas se lee "giros bruscos / frenadas
+        bruscas". Puntualidad es el porcentaje de formularios diligenciados dentro de la ventana
+        esperada. Los 3 excesos de Luis Alberto Nocua son los del 23 de julio, único día del
+        periodo del piloto con eventos de velocidad en el reporte.</p>
+    </div>
+  </section>
+
+  <!-- ══ 6. CALIDAD ══════════════════════════════════════ -->
+  <section id="calidad">
+    <div class="sec-h"><span class="n">06</span><h2>Calidad del dato: lo que el tablero ya detecta</h2></div>
+    <p class="sec-sub">La misma medición que muestra la operación muestra dónde la operación no
+      se está registrando bien. Se presenta abierto porque es la parte accionable de esta semana.</p>
+
+    <div class="grid g2 top">
+      <div class="card">
+        <h3 style="font-family:var(--accent);font-weight:700;font-size:14.5px">Composición de los 30 recorridos</h3>
+        <div class="stack" id="stackCal"></div>
+        <div class="legend" id="lgCal"></div>
+        <div class="note warn"><b>Cinco recorridos duraron menos de un minuto</b> (falsos
+          arranques) y <b>cuatro quedaron sin cierre</b>, acumulando duraciones de 52 h a 473 h.
+          Son cierres de trayecto que el conductor no ejecutó — se corrigen con hábito, y hasta
+          que se corrijan las horas de operación no se pueden sumar directamente.</div>
+      </div>
+      <div class="card">
+        <h3 style="font-family:var(--accent);font-weight:700;font-size:14.5px">Los tres hallazgos, en orden</h3>
+        <div class="tbl-scroll" id="tblCal" style="max-height:none"></div>
+        <div class="note"><b>Ninguno de estos tres se puede ver sin plataforma.</b> Un formato en
+          papel nunca revela que un trayecto quedó abierto 473 horas ni que la distancia no se
+          está calculando: simplemente no habría nada que revisar.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 7. VALOR ════════════════════════════════════════ -->
+  <section id="valor">
+    <div class="sec-h"><span class="n">07</span><h2>Qué habilita esto para FORTOX</h2></div>
+    <p class="sec-sub">Cada punto de abajo se sostiene con un dato de este mismo piloto, no con
+      una promesa de producto.</p>
+    <div class="vlist" id="vlist"></div>
+  </section>
+
+  <!-- ══ 8. NOTAS ════════════════════════════════════════ -->
+  <section id="notas">
+    <div class="sec-h"><span class="n">08</span><h2>Metodología y fuentes</h2></div>
+    <div class="card" style="font-size:13px;color:var(--ink-2)">
+      <p><b>Fuentes.</b> Dos reportes exportados de la plataforma OnTrack:
+        <i>Rutas ejecutadas</i> (30 filas, 21/07/2026 – 19/08/2026) e
+        <i>Velocidad excedida</i> (129 filas, 01/06/2026 – 23/07/2026). El ranking de conductores
+        proviene del módulo de calificación de la misma plataforma, para el periodo del piloto.
+        No se agregó ningún dato externo ni estimado.</p>
+      <p style="margin-top:10px"><b>Cómo se calculó cada cosa.</b>
+        Las <i>horas de operación</i> (192,8 h) suman solo los 21 recorridos con duración entre
+        1 minuto y 48 horas, para no contaminar el total con falsos arranques ni trayectos sin
+        cierre. Los <i>km en exceso</i> (107,5 km) se calculan con la distancia geodésica entre
+        la coordenada de inicio y la de fin de cada evento. Los <i>puntos recurrentes</i> agrupan
+        eventos en una malla de ~660 m y se ubican en el centroide del grupo. El
+        <i>corredor de 12,5 km</i> es la extensión norte–sur de los 122 eventos que quedan al
+        excluir 7 eventos ubicados fuera de esa zona.</p>
+      <p style="margin-top:10px"><b>Límites que conviene decir en voz alta.</b>
+        (1) Las dos ventanas de medición no se solapan del todo, así que la caída de excesos entre
+        junio y el periodo del piloto es un hecho de los datos disponibles, no una relación de
+        causa probada. (2) La columna de distancia recorrida llega en cero en 28 de los 30
+        recorridos, por lo que aquí no se reportan kilómetros de operación. (3) El umbral de 60
+        km/h es el configurado en el reporte; cambiarlo cambia el conteo de eventos.
+        (4) La ubicación del corredor se describe a partir de las coordenadas del reporte: cada
+        punto del mapa enlaza a Google Maps para verificarlo.</p>
+      <p style="margin-top:10px"><b>Diseño de los gráficos.</b> Un color por vehículo, el mismo en
+        todo el tablero (la identidad no cambia entre gráficos). Paleta categórica verificada para
+        daltonismo, y todo valor legible también en las tablas: ningún dato depende del color ni
+        del cursor encima.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div>
+      <b style="color:var(--ink-2)">OnTrack Global</b> · Tablero de resultados del piloto FORTOX<br />
+      Generado el 20 de agosto de 2026 a partir de los reportes de la plataforma.
+      Documento de trabajo para revisión interna y con el cliente.
+    </div>
+    <img src="assets/ontrack-icon.png" alt="" />
+  </footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  'use strict';
+  const D = window.DATA, K = D.kpi;
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = (s, r) => (r||document).querySelector(s);
+
+  /* ── utilidades ─────────────────────────────────────────── */
+  const fmt = (n, d) => Number(n).toLocaleString('es-CO',
+    {minimumFractionDigits: d||0, maximumFractionDigits: d===undefined?0:d});
+  function svg(w, h){
+    const s = document.createElementNS(NS,'svg');
+    s.setAttribute('viewBox','0 0 '+w+' '+h);
+    s.setAttribute('role','img');
+    return s;
+  }
+  function el(name, attrs, parent){
+    const e = document.createElementNS(NS,name);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, s, o){
+    const t = el('text',{x:x, y:y}, parent);
+    t.textContent = s;
+    const st = Object.assign({size:11, weight:600, fill:'#7d8481', anchor:'middle'}, o||{});
+    t.setAttribute('font-size', st.size);
+    t.setAttribute('font-weight', st.weight);
+    t.setAttribute('fill', st.fill);
+    t.setAttribute('text-anchor', st.anchor);
+    t.setAttribute('font-family', st.family || 'Montserrat, system-ui, sans-serif');
+    return t;
+  }
+  /* Barra con extremo de dato redondeado 4px y base cuadrada. */
+  function colPath(x, y, w, h){
+    const r = Math.min(4, w/2, Math.max(h,0));
+    if (h <= 0.5) return 'M'+x+' '+(y+h)+' h'+w;
+    return 'M'+x+' '+(y+h)+' V'+(y+r)+' q0 '+(-r)+' '+r+' '+(-r)+
+           ' h'+(w-2*r)+' q'+r+' 0 '+r+' '+r+' V'+(y+h)+' Z';
+  }
+  function rowPath(x, y, w, h){
+    const r = Math.min(4, h/2, Math.max(w,0));
+    if (w <= 0.5) return 'M'+x+' '+y+' v'+h;
+    return 'M'+x+' '+y+' H'+(x+w-r)+' q'+r+' 0 '+r+' '+r+
+           ' v'+(h-2*r)+' q0 '+r+' '+(-r)+' '+r+' H'+x+' Z';
+  }
+  function gridline(g, x1, x2, y){
+    el('line',{x1:x1, x2:x2, y1:y, y2:y, stroke:'#eceeec', 'stroke-width':1}, g);
+  }
+  function baseline(g, x1, x2, y){
+    el('line',{x1:x1, x2:x2, y1:y, y2:y, stroke:'#c9d1ce', 'stroke-width':1}, g);
+  }
+
+  /* ── tooltip compartido ─────────────────────────────────── */
+  const tip = document.createElement('div');
+  tip.className = 'tip';
+  document.body.appendChild(tip);
+  function bindTip(node, html){
+    node.style.cursor = 'default';
+    node.addEventListener('pointerenter', function(){ tip.innerHTML = html(); tip.style.opacity = 1; });
+    node.addEventListener('pointermove', function(ev){
+      const pad = 14;
+      let x = ev.clientX + pad, y = ev.clientY - 12;
+      const r = tip.getBoundingClientRect();
+      if (x + r.width > window.innerWidth - 8) x = ev.clientX - r.width - pad;
+      if (y < 8) y = 8;
+      tip.style.left = x + 'px'; tip.style.top = y + 'px';
+    });
+    node.addEventListener('pointerleave', function(){ tip.style.opacity = 0; });
+  }
+
+  /* ── identidad de vehículo: un color, el mismo en todo ──── */
+  const VCOLOR = {DNT17F:'#2a78d6', BKG90D:'#eb6834', AXD62F:'#1baf7a'};
+  const SEV = ['#eba47a','#e08149','#c85f1e','#9c3b0b'];
+  const GREEN = '#01a532', GREEN_DEEP = '#1a5100', INK = '#151e17', INK2 = '#3c4442', MUTED = '#7d8481';
+
+  /* Los rótulos guardan una variante enmascarada en data-anon por si algún día hay
+     que publicar sin nombres; hoy siempre se muestra el valor real. */
+  const anon = false;
+  function plateSafe(p){ return p.slice(0,2) + '•••' + p.slice(-1); }
+
+  /* ── helper: tabla desde filas ──────────────────────────── */
+  function table(host, cols, rows){
+    const t = document.createElement('table');
+    const th = document.createElement('thead'), tr = document.createElement('tr');
+    cols.forEach(function(c){
+      const h = document.createElement('th');
+      h.textContent = c.t;
+      if (c.num) h.className = 'num';
+      tr.appendChild(h);
+    });
+    th.appendChild(tr); t.appendChild(th);
+    const tb = document.createElement('tbody');
+    rows.forEach(function(r){
+      const row = document.createElement('tr');
+      cols.forEach(function(c){
+        const td = document.createElement('td');
+        if (c.num) td.className = 'num';
+        const v = c.f(r);
+        if (v instanceof Node) td.appendChild(v); else td.innerHTML = v;
+        row.appendChild(td);
+      });
+      tb.appendChild(row);
+    });
+    t.appendChild(tb);
+    host.innerHTML = '';
+    host.appendChild(t);
+  }
+  function plateCell(p){
+    const s = document.createElement('span');
+    const dot = document.createElement('i');
+    dot.className = 'dot'; dot.style.background = VCOLOR[p];
+    const b = document.createElement('b');
+    b.setAttribute('data-real', p); b.setAttribute('data-anon', plateSafe(p));
+    b.textContent = p;
+    s.appendChild(dot); s.appendChild(b);
+    return s;
+  }
+  function nameCell(full, safe){
+    const b = document.createElement('span');
+    b.setAttribute('data-real', full); b.setAttribute('data-anon', safe);
+    b.textContent = full;
+    return b;
+  }
+  const hm = s => { const h = Math.floor(s/3600), m = Math.round((s%3600)/60);
+    return h ? (h + ' h ' + String(m).padStart(2,'0') + ' min') : (m + ' min'); };
+  const fecha = s => s.slice(8,10) + '/' + s.slice(5,7) + '/' + s.slice(0,4) + ' ' + s.slice(11,16);
+  const gmaps = (la, lo) => 'https://www.google.com/maps?q=' + la + ',' + lo;
+
+  /* ══ HERO + FICHAS ═════════════════════════════════════ */
+  $('#heroFig').textContent = fmt(K.excesos);
+  $('#heroMin').textContent = fmt(K.excesosMin) + ' minutos';
+  $('#heroKm').textContent  = fmt(K.kmExceso,1) + ' km';
+  $('#heroMax').textContent = K.vmax + ' km/h';
+
+  function tiles(host, items){
+    host.innerHTML = '';
+    items.forEach(function(it){
+      const d = document.createElement('div');
+      d.className = 'tile' + (it.alt ? ' alt' : '');
+      d.innerHTML = '<div class="v">' + it.v + (it.u ? '<small>' + it.u + '</small>' : '') +
+                    '</div><div class="l">' + it.l + '</div>';
+      host.appendChild(d);
+    });
+  }
+  tiles($('#tilesMain'), [
+    {v: fmt(K.recorridos), l: 'Recorridos ejecutados<br />en ' + K.diasOperacion + ' días de operación'},
+    {v: K.vehiculos + ' / ' + K.conductores, l: 'Vehículos y conductores<br />con actividad registrada'},
+    {v: fmt(K.formularios), l: 'Chequeos preoperacionales<br />diligenciados en el piloto'},
+    {v: fmt(K.excesos), u: 'eventos', l: 'Excesos de velocidad<br />umbral ' + D.meta.umbral + ' km/h', alt: true}
+  ]);
+  tiles($('#tilesOp'), [
+    {v: fmt(K.horas,1), u: 'h', l: 'Horas de operación medidas<br />solo recorridos con cierre válido'},
+    {v: fmt(K.horasProm,1), u: 'h', l: 'Duración promedio<br />de un recorrido válido'},
+    {v: fmt(K.diasOperacion), l: 'Días distintos con operación<br />entre el 21/07 y el 19/08'},
+    {v: fmt(D.recorridos.porVehiculo[0].n), l: 'Recorridos del vehículo más usado<br />' +
+        '<span data-real="' + D.recorridos.porVehiculo[0].placa + '" data-anon="' +
+        plateSafe(D.recorridos.porVehiculo[0].placa) + '">' + D.recorridos.porVehiculo[0].placa + '</span>'}
+  ]);
+
+  /* ══ 02 · RECORRIDOS POR DÍA (columnas apiladas) ════════ */
+  (function(){
+    const data = D.recorridos.porDia;
+    const placas = ['BKG90D','AXD62F','DNT17F'];
+    const W = 560, H = 236, ML = 26, MR = 6, MT = 14, MB = 28;
+    const s = svg(W, H);
+    s.setAttribute('aria-label', 'Recorridos ejecutados por día, apilados por vehículo');
+    const pw = W - ML - MR, ph = H - MT - MB;
+    const max = 5, band = pw / data.length, bar = Math.min(20, band - 10);
+    for (let v = 0; v <= max; v++){
+      const y = MT + ph - (v/max)*ph;
+      if (v) gridline(s, ML, W-MR, y);
+      txt(s, ML-7, y+3.5, v, {anchor:'end', size:10, fill:MUTED});
+    }
+    data.forEach(function(d, i){
+      const x = ML + band*i + (band-bar)/2;
+      let acc = 0;
+      placas.forEach(function(p){
+        const n = d.por[p] || 0;
+        if (!n) return;
+        const hpx = (n/max)*ph;
+        const y = MT + ph - hpx - acc;
+        const gap = acc ? 2 : 0;                        /* separador de superficie */
+        const path = el('path', {d: colPath(x, y+gap, bar, hpx-gap), fill: VCOLOR[p]}, s);
+        bindTip(path, function(){
+          return '<b>' + d.lbl + ' · ' + d.dow + '</b><em>' + (anon ? plateSafe(p) : p) + '</em> · ' +
+                 n + (n===1 ? ' recorrido' : ' recorridos');
+        });
+        acc += hpx;
+      });
+      if (d.n === 5) txt(s, x + bar/2, MT + ph - acc - 7, '5', {size:11, weight:800, fill:INK});
+      txt(s, x + bar/2, MT + ph + 14, d.lbl, {size:8.6, fill:MUTED});
+    });
+    baseline(s, ML, W-MR, MT+ph);
+    $('#chRecDia').appendChild(s);
+    $('#lgRecDia').innerHTML = placas.map(function(p){
+      return '<span><i style="background:' + VCOLOR[p] + '"></i><span data-real="' + p +
+             '" data-anon="' + plateSafe(p) + '">' + p + '</span></span>';
+    }).join('') + '<span class="dim">Máximo en un día: 5 recorridos (29/07)</span>';
+
+    table($('#tblRec'), [
+      {t:'Inicio', f:r=>fecha(r.ini)},
+      {t:'Fin', f:r=>fecha(r.fin)},
+      {t:'Vehículo', f:r=>plateCell(r.placa)},
+      {t:'Conductor', f:r=>nameCell(r.cond, r.anonCond)},
+      {t:'Duración', num:true, f:r=>r.durtxt},
+      {t:'Estado', f:function(r){
+        if (r.clase==='valido') return '<span class="chip chip--good">válido</span>';
+        if (r.clase==='corto')  return '<span class="chip chip--warn">falso arranque</span>';
+        return '<span class="chip chip--serious">sin cierre</span>';
+      }}
+    ], D.recorridos.lista);
+  })();
+
+  /* ══ 02 · RECORRIDOS POR VEHÍCULO (barras) ══════════════ */
+  (function(){
+    const data = D.recorridos.porVehiculo.slice().sort((a,b)=>b.n-a.n);
+    const W = 380, rowH = 46, MT = 8, ML = 74, MR = 46;
+    const H = MT + rowH*data.length + 6;
+    const s = svg(W, H);
+    s.setAttribute('aria-label','Recorridos por vehículo');
+    const max = Math.max.apply(null, data.map(d=>d.n)), pw = W - ML - MR;
+    data.forEach(function(d, i){
+      const y = MT + rowH*i;
+      const w = (d.n/max)*pw;
+      const path = el('path',{d: rowPath(ML, y+6, w, 18), fill: VCOLOR[d.placa]}, s);
+      bindTip(path, function(){
+        return '<b>' + (anon ? plateSafe(d.placa) : d.placa) + '</b>' + d.n + ' recorridos · ' +
+               d.validos + ' con cierre válido<em>' + fmt(d.horas,1) + ' h medidas</em>';
+      });
+      const lbl = txt(s, ML-9, y+19, '', {anchor:'end', size:11.5, weight:800, fill:INK});
+      lbl.setAttribute('data-real', d.placa); lbl.setAttribute('data-anon', plateSafe(d.placa));
+      lbl.textContent = d.placa;
+      txt(s, ML + w + 8, y+19, d.n, {anchor:'start', size:12.5, weight:800, fill:INK});
+      const who = txt(s, ML, y+36, '', {anchor:'start', size:9.6, fill:MUTED});
+      who.setAttribute('data-real', d.conds.join(' · '));
+      who.setAttribute('data-anon', d.anonConds.join(' · '));
+      who.textContent = d.conds.join(' · ');
+    });
+    $('#chRecVeh').appendChild(s);
+    table($('#tblRecVeh'), [
+      {t:'Vehículo', f:r=>plateCell(r.placa)},
+      {t:'Recorridos', num:true, f:r=>r.n},
+      {t:'Con cierre válido', num:true, f:r=>r.validos},
+      {t:'Horas medidas', num:true, f:r=>fmt(r.horas,1)},
+      {t:'Conductor(es)', f:r=>nameCell(r.conds.join(' · '), r.anonConds.join(' · '))}
+    ], data);
+  })();
+
+  /* ══ 03 · EXCESOS POR VEHÍCULO (barras) ════════════════ */
+  (function(){
+    const data = D.excesos.porVehiculo.slice().sort((a,b)=>b.n-a.n);
+    const W = 480, rowH = 52, ML = 76, MR = 62, MT = 6;
+    const H = MT + rowH*data.length;
+    const s = svg(W, H);
+    s.setAttribute('aria-label','Excesos de velocidad por vehículo');
+    const max = Math.max.apply(null, data.map(d=>d.n)), pw = W - ML - MR;
+    data.forEach(function(d, i){
+      const y = MT + rowH*i;
+      const w = d.n ? Math.max((d.n/max)*pw, 2) : 0;
+      if (w){
+        const path = el('path',{d: rowPath(ML, y+8, w, 20), fill: VCOLOR[d.placa]}, s);
+        bindTip(path, function(){
+          return '<b>' + (anon ? plateSafe(d.placa) : d.placa) + '</b>' + d.n + ' excesos en ' +
+                 d.dias + ' días<em>máx. ' + d.vmax + ' km/h · ' + hm(d.seg) + ' en exceso</em>';
+        });
+      } else {
+        el('line',{x1:ML, x2:ML+10, y1:y+18, y2:y+18, stroke:'#c9d1ce','stroke-width':2}, s);
+      }
+      const lbl = txt(s, ML-9, y+22, '', {anchor:'end', size:11.5, weight:800, fill:INK});
+      lbl.setAttribute('data-real', d.placa); lbl.setAttribute('data-anon', plateSafe(d.placa));
+      lbl.textContent = d.placa;
+      txt(s, ML + Math.max(w,10) + 8, y+22, d.n ? fmt(d.n) : 'ninguno',
+          {anchor:'start', size:13, weight:800, fill: d.n ? INK : MUTED});
+      txt(s, ML, y+40, d.n ? ('máx. ' + d.vmax + ' km/h · ' + hm(d.seg) + ' en exceso · ' + d.dias + ' días')
+                           : 'sin eventos registrados en la ventana',
+          {anchor:'start', size:9.8, fill:MUTED});
+    });
+    $('#chExVeh').appendChild(s);
+    $('#lgVeh').innerHTML =
+      '<span><i style="background:' + VCOLOR.DNT17F + '"></i>125 de 129 eventos</span>' +
+      '<span class="dim">El mismo color identifica al vehículo en todo el tablero</span>';
+    table($('#tblExVeh'), [
+      {t:'Vehículo', f:r=>plateCell(r.placa)},
+      {t:'Excesos', num:true, f:r=>fmt(r.n)},
+      {t:'Participación', num:true, f:r=>fmt(100*r.n/K.excesos,1) + ' %'},
+      {t:'Días con eventos', num:true, f:r=>r.dias},
+      {t:'Vel. máx.', num:true, f:r=>r.vmax ? r.vmax + ' km/h' : '—'},
+      {t:'Tiempo en exceso', num:true, f:r=>r.seg ? hm(r.seg) : '—'}
+    ], data);
+  })();
+
+  /* ══ 03 · EXCESOS POR HORA (columnas 0–23) ═════════════ */
+  (function(){
+    const data = D.excesos.porHora;
+    const W = 480, H = 230, ML = 30, MR = 8, MT = 22, MB = 34;
+    const s = svg(W, H);
+    s.setAttribute('aria-label','Excesos de velocidad por hora del día');
+    const pw = W-ML-MR, ph = H-MT-MB, band = pw/24, bar = Math.min(16, band-4);
+    const max = 70;
+    [0,35,70].forEach(function(v){
+      const y = MT + ph - (v/max)*ph;
+      if (v) gridline(s, ML, W-MR, y);
+      txt(s, ML-7, y+3.5, v, {anchor:'end', size:10, fill:MUTED});
+    });
+    data.forEach(function(d){
+      const x = ML + band*d.h + (band-bar)/2;
+      if (d.n){
+        const hpx = (d.n/max)*ph, y = MT + ph - hpx;
+        const path = el('path',{d: colPath(x, y, bar, hpx), fill: GREEN}, s);
+        bindTip(path, function(){
+          return '<b>' + String(d.h).padStart(2,'0') + ':00 – ' + String(d.h).padStart(2,'0') + ':59</b>' +
+                 d.n + ' excesos<em>' + fmt(100*d.n/K.excesos,1) + ' % del total</em>';
+        });
+        if (d.n > 40) txt(s, x+bar/2, y-7, d.n, {size:11.5, weight:800, fill:GREEN_DEEP});
+      }
+      if (d.h % 3 === 0) txt(s, x+bar/2, MT+ph+15, String(d.h).padStart(2,'0'), {size:9.5, fill:MUTED});
+    });
+    txt(s, ML+pw/2, H-4, 'hora del día', {size:9.5, fill:'#a9b0ad'});
+    baseline(s, ML, W-MR, MT+ph);
+    $('#chExHora').appendChild(s);
+    table($('#tblExHora'), [
+      {t:'Franja', f:r=>String(r.h).padStart(2,'0') + ':00 – ' + String(r.h).padStart(2,'0') + ':59'},
+      {t:'Excesos', num:true, f:r=>r.n},
+      {t:'% del total', num:true, f:r=>r.n ? fmt(100*r.n/K.excesos,1) + ' %' : '—'}
+    ], data.filter(r=>r.n));
+  })();
+
+  /* ══ 03 · EXCESOS POR DÍA (columnas) ═══════════════════ */
+  (function(){
+    const data = D.excesos.porDia;
+    const W = 480, H = 230, ML = 30, MR = 8, MT = 20, MB = 40;
+    const s = svg(W, H);
+    s.setAttribute('aria-label','Excesos de velocidad por día');
+    const pw = W-ML-MR, ph = H-MT-MB, band = pw/data.length, bar = Math.min(20, band-12);
+    const max = 20;
+    [0,10,20].forEach(function(v){
+      const y = MT + ph - (v/max)*ph;
+      if (v) gridline(s, ML, W-MR, y);
+      txt(s, ML-7, y+3.5, v, {anchor:'end', size:10, fill:MUTED});
+    });
+    data.forEach(function(d, i){
+      const x = ML + band*i + (band-bar)/2;
+      const hpx = (d.n/max)*ph, y = MT + ph - hpx;
+      const path = el('path',{d: colPath(x, y, bar, hpx), fill: GREEN}, s);
+      bindTip(path, function(){
+        return '<b>' + d.lbl + ' · ' + d.dow + '</b>' + d.n + ' excesos<em>máx. ' + d.vmax + ' km/h</em>';
+      });
+      if (i === 1 || i === data.length-1)
+        txt(s, x+bar/2, y-7, d.n, {size:11, weight:800, fill:GREEN_DEEP});
+      txt(s, x+bar/2, MT+ph+15, d.lbl, {size:9.5, fill:MUTED});
+      txt(s, x+bar/2, MT+ph+26, d.dow, {size:8.5, fill:'#a9b0ad'});
+    });
+    /* marca del salto entre el 11/06 y el 23/07 */
+    const xs = ML + band*(data.length-1);
+    el('line',{x1:xs, x2:xs, y1:MT-4, y2:MT+ph, stroke:'#c9d1ce','stroke-width':1}, s);
+    txt(s, xs-4, MT-8, 'salto de 42 días', {anchor:'end', size:9, fill:'#a9b0ad'});
+    baseline(s, ML, W-MR, MT+ph);
+    $('#chExDia').appendChild(s);
+    table($('#tblExDia'), [
+      {t:'Día', f:r=>r.lbl + '/2026'},
+      {t:'Día de la semana', f:r=>r.dow},
+      {t:'Excesos', num:true, f:r=>r.n},
+      {t:'Vel. máx.', num:true, f:r=>r.vmax + ' km/h'}
+    ], data);
+  })();
+
+  /* ══ 03 · DISTRIBUCIÓN DE VELOCIDAD (rampa ordinal) ════ */
+  (function(){
+    const data = D.excesos.porVelocidad;
+    const W = 480, H = 230, ML = 34, MR = 8, MT = 24, MB = 44;
+    const s = svg(W, H);
+    s.setAttribute('aria-label','Distribución de la velocidad máxima por evento');
+    const pw = W-ML-MR, ph = H-MT-MB, band = pw/data.length, bar = Math.min(58, band-22);
+    const max = 60;
+    [0,20,40,60].forEach(function(v){
+      const y = MT + ph - (v/max)*ph;
+      if (v) gridline(s, ML, W-MR, y);
+      txt(s, ML-7, y+3.5, v, {anchor:'end', size:10, fill:MUTED});
+    });
+    data.forEach(function(d, i){
+      const x = ML + band*i + (band-bar)/2;
+      const hpx = (d.n/max)*ph, y = MT + ph - hpx;
+      const path = el('path',{d: colPath(x, y, bar, hpx), fill: SEV[i]}, s);
+      bindTip(path, function(){
+        return '<b>' + d.a + '–' + d.b + ' km/h</b>' + d.n + ' eventos<em>' +
+               fmt(100*d.n/K.excesos,1) + ' % del total</em>';
+      });
+      txt(s, x+bar/2, y-8, d.n, {size:12, weight:800, fill:INK});
+      txt(s, x+bar/2, MT+ph+16, d.a + '–' + d.b, {size:10, weight:700, fill:INK2});
+      txt(s, x+bar/2, MT+ph+28, fmt(100*d.n/K.excesos,1) + ' %', {size:9.5, fill:MUTED});
+    });
+    txt(s, ML+pw/2, H-5, 'velocidad máxima alcanzada (km/h)', {size:9.5, fill:'#a9b0ad'});
+    baseline(s, ML, W-MR, MT+ph);
+    $('#chExVel').appendChild(s);
+    table($('#tblExVel'), [
+      {t:'Rango', f:r=>r.a + ' – ' + r.b + ' km/h'},
+      {t:'Eventos', num:true, f:r=>r.n},
+      {t:'% del total', num:true, f:r=>fmt(100*r.n/K.excesos,1) + ' %'},
+      {t:'Sobre el umbral', num:true, f:r=>'+' + (r.a-60) + ' a +' + (r.b-60) + ' km/h'}
+    ], data);
+  })();
+
+  /* ══ 03 · TOP 10 EVENTOS ═══════════════════════════════ */
+  table($('#tblTop'), [
+    {t:'Fecha y hora', f:r=>fecha(r.ini)},
+    {t:'Vehículo', f:r=>plateCell(r.placa)},
+    {t:'Vel. máx.', num:true, f:r=>'<b>' + r.v + ' km/h</b>'},
+    {t:'Sobre umbral', num:true, f:r=>'+' + (r.v-60)},
+    {t:'Duración', num:true, f:r=>r.dur + ' s'},
+    {t:'Ubicación', f:r=>'<a href="' + gmaps(r.lat, r.lon) + '" target="_blank" rel="noopener">ver en el mapa</a>'}
+  ], D.excesos.top);
+
+  /* ══ 04 · MAPA SOBRE CARTOGRAFÍA REAL ══════════════════ */
+  (function(){
+    /* Parámetros de las dos imágenes: nivel de zoom y origen en el espacio de
+       píxeles Web Mercator, para poder proyectar cada coordenada sobre la imagen. */
+    const CORR = {z:13, ox:1234395, oy:2039484, w:600,  h:1473, ts:512};
+    const CTX  = {z:10, ox:153951,  oy:254838,  w:510,  h:657,  ts:512};
+    const mx = (m, lon) => ((lon+180)/360)*Math.pow(2,m.z)*m.ts - m.ox;
+    const my = (m, lat) => {
+      const la = lat*Math.PI/180;
+      return ((1 - Math.log(Math.tan(la) + 1/Math.cos(la))/Math.PI)/2)*Math.pow(2,m.z)*m.ts - m.oy;
+    };
+    const inside = (m, x, y) => x > 6 && x < m.w-6 && y > 6 && y < m.h-6;
+
+    const all  = D.excesos.hotspots;
+    const maxN = Math.max.apply(null, all.map(h=>h.n));
+
+    /* ── mapa del corredor ── */
+    const s1 = svg(CORR.w, CORR.h);
+    s1.setAttribute('aria-label','Puntos de exceso de velocidad sobre el corredor Chía – Cajicá');
+    s1.setAttribute('preserveAspectRatio','none');
+    const shown = [];
+    all.forEach(function(h){
+      const x = mx(CORR, h.lon), y = my(CORR, h.lat);
+      if (!inside(CORR, x, y)) return;
+      shown.push(h);
+      const r = 13 + 22*Math.sqrt(h.n/maxN);
+      const g = el('g',{}, s1);
+      el('circle',{cx:x, cy:y, r:r, fill:'#ffffff', 'fill-opacity':0.9}, g);   /* anillo de superficie */
+      el('circle',{cx:x, cy:y, r:r-4, fill:GREEN, 'fill-opacity':0.82}, g);
+      if (h.n >= 10){
+        txt(s1, x, y+7, h.n, {size:20, weight:800, fill:'#ffffff'});
+      }
+      bindTip(g, function(){
+        return '<b>' + h.n + (h.n===1?' evento':' eventos') + '</b>máx. ' + h.vmax +
+               ' km/h<em>' + h.lat.toFixed(4) + ', ' + h.lon.toFixed(4) + '</em>';
+      });
+    });
+    $('#mapCorredor').appendChild(s1);
+
+    /* ── inserto de contexto ── */
+    const s2 = svg(CTX.w, CTX.h);
+    s2.setAttribute('aria-label','Mapa de contexto: el corredor medido al norte de Bogotá');
+    s2.setAttribute('preserveAspectRatio','none');
+    const lats = shown.map(h=>h.lat), lons = shown.map(h=>h.lon);
+    const x0 = mx(CTX, Math.min.apply(null,lons)), x1 = mx(CTX, Math.max.apply(null,lons));
+    const y0 = my(CTX, Math.max.apply(null,lats)), y1 = my(CTX, Math.min.apply(null,lats));
+    el('rect',{x:x0-7, y:y0-5, width:(x1-x0)+14, height:(y1-y0)+10, rx:7,
+               fill:GREEN, 'fill-opacity':0.14, stroke:GREEN, 'stroke-width':2.5}, s2);
+    all.forEach(function(h){
+      const x = mx(CORR, h.lon), y = my(CORR, h.lat);
+      if (inside(CORR, x, y)) return;                       /* los de dentro ya están arriba */
+      const cx = mx(CTX, h.lon), cy = my(CTX, h.lat);
+      if (!inside(CTX, cx, cy)) return;
+      el('circle',{cx:cx, cy:cy, r:6, fill:'#ffffff', 'fill-opacity':0.9}, s2);
+      const c = el('circle',{cx:cx, cy:cy, r:4, fill:'#c85f1e'}, s2);
+      bindTip(c, function(){
+        return '<b>' + h.n + (h.n===1?' evento':' eventos') + ' fuera del corredor</b>máx. ' +
+               h.vmax + ' km/h<em>' + h.lat.toFixed(4) + ', ' + h.lon.toFixed(4) + '</em>';
+      });
+    });
+    $('#mapContexto').appendChild(s2);
+
+    /* ── lista de los 8 puntos más repetidos ── */
+    const list = $('#hotList');
+    all.slice(0, 8).forEach(function(h, i){
+      const li = document.createElement('li');
+      li.innerHTML =
+        '<span class="rank">' + (i+1) + '°</span>' +
+        '<span class="meta"><b>' + h.n + ' eventos · máx. ' + h.vmax + ' km/h</b>' +
+        '<span>' + h.lat.toFixed(5) + ', ' + h.lon.toFixed(5) + '</span></span>' +
+        '<a href="' + gmaps(h.lat, h.lon) + '" target="_blank" rel="noopener">Google Maps</a>';
+      list.appendChild(li);
+    });
+    const top8 = all.slice(0,8).reduce((a,h)=>a+h.n, 0);
+    const li = document.createElement('li');
+    li.style.borderBottom = 'none';
+    li.innerHTML = '<span class="rank"></span><span class="meta"><b>' + top8 + ' de ' + K.excesos +
+      ' eventos (' + fmt(100*top8/K.excesos,1) + ' %) en estos 8 puntos</b>' +
+      '<span>' + shown.length + ' de los 32 puntos recurrentes caen dentro del tramo</span></span>';
+    list.appendChild(li);
+  })();
+
+  /* ══ 05 · RANKING DE CONDUCTORES ═══════════════════════ */
+  (function(){
+    const data = D.ranking;
+    const W = 560, rowH = 62, ML = 16, MR = 46, MT = 12;
+    const H = MT + rowH*data.length;
+    const s = svg(W, H);
+    s.setAttribute('aria-label','Puntaje por conductor, escala 0 a 5');
+    const pw = W - ML - MR;
+    [0,1,2,3,4,5].forEach(function(v){
+      const x = ML + (v/5)*pw;
+      el('line',{x1:x, x2:x, y1:MT+14, y2:MT+rowH*data.length-16, stroke:'#eceeec','stroke-width':1}, s);
+      txt(s, x, MT+rowH*data.length-4, v, {size:9.5, fill:'#a9b0ad'});
+    });
+    data.forEach(function(d, i){
+      const y = MT + rowH*i;
+      const w = Math.max((d.score/5)*pw, 2);
+      const color = d.activo ? GREEN : '#c9d1ce';
+      txt(s, ML, y+8, d.pos + '°  ', {anchor:'start', size:11, weight:800,
+        fill: d.activo ? GREEN : '#a9b0ad'});
+      const nm = txt(s, ML+19, y+8, '', {anchor:'start', size:11.5, weight:700,
+        fill: d.activo ? INK : MUTED});
+      nm.setAttribute('data-real', d.full); nm.setAttribute('data-anon', d.anon);
+      nm.textContent = d.full;
+      const path = el('path',{d: rowPath(ML, y+16, w, 18), fill: color}, s);
+      bindTip(path, function(){
+        return '<b>' + (anon ? d.anon : d.full) + '</b>Puntaje ' + fmt(d.score,2) + ' / 5<em>' +
+               d.form + ' chequeos · ' + d.excesos + ' excesos · ' + d.giros + ' giros bruscos</em>' +
+               (d.activo ? '' : '<em>sin operación asignada en el piloto</em>');
+      });
+      txt(s, ML + w + 8, y+29, fmt(d.score,2),
+          {anchor:'start', size:12.5, weight:800, fill: d.activo ? INK : MUTED});
+      txt(s, ML, y+47, d.activo
+            ? (d.form + ' chequeos · ' + d.excesos + ' excesos · ' + d.giros + ' giros bruscos · ' +
+               fmt(d.punt,0) + ' % de puntualidad')
+            : (d.form ? 'creado en plataforma · ' + d.form + ' chequeos · sin operación en el piloto'
+                      : 'creado en plataforma · sin actividad en el piloto'),
+          {anchor:'start', size:9.6, fill: d.activo ? MUTED : '#a9b0ad'});
+    });
+    $('#chRank').appendChild(s);
+    $('#lgRank').innerHTML =
+      '<span><i style="background:' + GREEN + '"></i>Con operación en el piloto</span>' +
+      '<span><i style="background:#c9d1ce"></i>Creado en plataforma, sin operación asignada</span>';
+
+    const off = data.filter(d=>!d.activo);
+    $('#offNames').setAttribute('data-real', off[0].full);
+    $('#offNames').setAttribute('data-anon', off[0].anon);
+    $('#offNames').textContent = off[0].full;
+    $('#offNames2').setAttribute('data-real', off[1].full);
+    $('#offNames2').setAttribute('data-anon', off[1].anon);
+    $('#offNames2').textContent = off[1].full;
+
+    table($('#tblRank'), [
+      {t:'#', f:r=>'<b>' + r.pos + '°</b>'},
+      {t:'Conductor', f:r=>nameCell(r.full, r.anon)},
+      {t:'Excesos de velocidad', num:true, f:r=>r.excesos},
+      {t:'Giros / frenadas', num:true, f:r=>r.giros + ' / ' + r.frenadas},
+      {t:'Chequeos diligenciados', num:true, f:r=>r.form},
+      {t:'Puntualidad', num:true, f:r=>r.form ? fmt(r.punt,1) + ' %' : '—'},
+      {t:'Puntaje', num:true, f:r=>'<b>' + fmt(r.score,2) + '</b>'},
+      {t:'Participación', f:r=>r.activo
+        ? '<span class="chip chip--good">operó en el piloto</span>'
+        : '<span class="chip chip--off">sin operación</span>'}
+    ], data);
+  })();
+
+  /* ══ 06 · CALIDAD DEL DATO ═════════════════════════════ */
+  (function(){
+    const c = D.recorridos.calidad, total = K.recorridos;
+    const seg = [
+      {n:c.valido,  c:'#0ca30c', l:'válidos'},
+      {n:c.corto,   c:'#fab219', l:'falsos arranques'},
+      {n:c.abierto, c:'#ec835a', l:'sin cierre'}
+    ];
+    const host = $('#stackCal');
+    seg.forEach(function(sg){
+      const sp = document.createElement('span');
+      sp.style.background = sg.c;
+      sp.style.flex = sg.n;
+      sp.textContent = sg.n;
+      sp.style.color = sg.c === '#fab219' ? '#4a3600' : '#fff';
+      sp.title = sg.n + ' ' + sg.l;
+      host.appendChild(sp);
+    });
+    $('#lgCal').innerHTML =
+      '<span><i style="background:#0ca30c"></i>✓ ' + c.valido + ' válidos (' +
+        fmt(100*c.valido/total,0) + ' %)</span>' +
+      '<span><i style="background:#fab219"></i>! ' + c.corto + ' falsos arranques (&lt; 1 min)</span>' +
+      '<span><i style="background:#ec835a"></i>▲ ' + c.abierto + ' sin cierre (&gt; 48 h)</span>';
+
+    table($('#tblCal'), [
+      {t:'Hallazgo', f:r=>'<b>' + r.h + '</b>'},
+      {t:'Magnitud', num:true, f:r=>r.m},
+      {t:'Qué implica', f:r=>r.q},
+      {t:'Severidad', f:r=>'<span class="chip chip--' + r.s + '">' + r.sl + '</span>'}
+    ], [
+      {h:'Distancia recorrida sin calcular', m:'28 de 30', s:'crit', sl:'alta',
+       q:'El reporte trae 0 km en 28 recorridos, así que hoy no se pueden medir kilómetros, consumo ni costo por km.'},
+      {h:'Trayectos sin cierre', m:'4 de 30', s:'serious', sl:'media',
+       q:'Duraciones de 52 h a 473 h: el conductor no cerró el trayecto. Infla cualquier suma de horas.'},
+      {h:'Falsos arranques', m:'5 de 30', s:'warn', sl:'baja',
+       q:'Trayectos de 4 a 15 segundos. Ruido en el conteo de recorridos; se depuran con una regla de duración mínima.'}
+    ]);
+  })();
+
+  /* ══ 07 · QUÉ HABILITA ═════════════════════════════════ */
+  (function(){
+    const items = [
+      {t:'Evidencia en lugar de percepción',
+       p:'Cada exceso queda con placa, fecha, hora, coordenada de inicio y fin, duración y velocidad máxima. Es material para retroalimentar al conductor, para el comité de seguridad vial y para responder ante un cliente o una aseguradora.',
+       e:'129 eventos documentados uno por uno'},
+      {t:'Intervención dirigida, no general',
+       p:'La medición señala el vehículo, la franja horaria y el tramo exacto. En lugar de una campaña para toda la flota, se interviene un vehículo, dos horarios y ocho puntos de vía.',
+       e:'96,9 % de los excesos en 1 vehículo · 93,8 % en 2 franjas'},
+      {t:'Comparación objetiva entre conductores',
+       p:'El puntaje combina excesos, giros y frenadas bruscas, chequeos diligenciados y puntualidad. Permite reconocer al que lo hace bien y acompañar al que no, con la misma regla para todos.',
+       e:'5 conductores calificados en escala 0–5'},
+      {t:'Cumplimiento del chequeo preoperacional',
+       p:'No solo si se diligenció, también cuándo. La puntualidad separa al conductor que llena el formulario antes de salir del que lo llena después, que es donde el control pierde sentido.',
+       e:'26 chequeos · puntualidad entre 0 % y 100 %'},
+      {t:'Trazabilidad de la operación día por día',
+       p:'Quién condujo, en qué vehículo, a qué hora salió y a qué hora llegó, cualquier día del mes hacia atrás. Es la base para auditar un incidente sin depender de la memoria de nadie.',
+       e:'30 recorridos en 18 días · 192,8 h con cierre válido'},
+      {t:'Control de la calidad del propio registro',
+       p:'El tablero muestra cuándo el dato no está bien tomado: trayectos sin cerrar, arranques falsos, distancia sin calcular. Eso convierte la adopción en algo medible y corregible, no en un supuesto.',
+       e:'3 hallazgos de registro detectados y cuantificados'}
+    ];
+    const host = $('#vlist');
+    items.forEach(function(it){
+      const d = document.createElement('div');
+      d.className = 'vitem';
+      d.innerHTML = '<h4>' + it.t + '</h4><p>' + it.p + '</p><span class="ev">▸ ' + it.e + '</span>';
+      host.appendChild(d);
+    });
+  })();
+
+  /* ══ CONTROLES ═════════════════════════════════════════ */
+  $('#btnPrint').addEventListener('click', function(){ window.print(); });
+})();
+</script>
+</body>
+</html>
