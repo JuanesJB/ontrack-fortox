@@ -23,7 +23,7 @@
     --ink:#151e17; --ink-2:#3c4442; --muted:#7d8481;
     --surface:#ffffff; --plane:#f6f8f7; --line:#e4eae8; --grid:#eceeec; --axis:#c9d1ce;
     /* Series categóricas — la identidad del vehículo, fija en todo el tablero.
-       Orden validado (CVD ΔE 9.2 all-pairs, luz) — ver notas metodológicas. */
+       Orden validado para daltonismo (CVD ΔE 9.2 en todos los pares, modo claro). */
     --v-dnt:#2a78d6; --v-bkg:#eb6834; --v-axd:#1baf7a;
     /* Rampa ordinal de severidad (un solo tono, claro→oscuro) */
     --sev-1:#eba47a; --sev-2:#e08149; --sev-3:#c85f1e; --sev-4:#9c3b0b;
@@ -234,7 +234,6 @@
     <a href="#conductores">Conductores</a>
     <a href="#calidad">Calidad del dato</a>
     <a href="#valor">Qué habilita</a>
-    <a href="#notas">Metodología</a>
   </nav>
 
   <!-- ══ 1. RESUMEN ══════════════════════════════════════ -->
@@ -469,38 +468,6 @@
     <p class="sec-sub">Cada punto de abajo se sostiene con un dato de este mismo piloto, no con
       una promesa de producto.</p>
     <div class="vlist" id="vlist"></div>
-  </section>
-
-  <!-- ══ 8. NOTAS ════════════════════════════════════════ -->
-  <section id="notas">
-    <div class="sec-h"><span class="n">08</span><h2>Metodología y fuentes</h2></div>
-    <div class="card" style="font-size:13px;color:var(--ink-2)">
-      <p><b>Fuentes.</b> Dos reportes exportados de la plataforma OnTrack:
-        <i>Rutas ejecutadas</i> (30 filas, 21/07/2026 – 19/08/2026) e
-        <i>Velocidad excedida</i> (129 filas, 01/06/2026 – 23/07/2026). El ranking de conductores
-        proviene del módulo de calificación de la misma plataforma, para el periodo del piloto.
-        No se agregó ningún dato externo ni estimado.</p>
-      <p style="margin-top:10px"><b>Cómo se calculó cada cosa.</b>
-        Las <i>horas de operación</i> (192,8 h) suman solo los 21 recorridos con duración entre
-        1 minuto y 48 horas, para no contaminar el total con falsos arranques ni trayectos sin
-        cierre. Los <i>km en exceso</i> (107,5 km) se calculan con la distancia geodésica entre
-        la coordenada de inicio y la de fin de cada evento. Los <i>puntos recurrentes</i> agrupan
-        eventos en una malla de ~660 m y se ubican en el centroide del grupo. El
-        <i>corredor de 12,5 km</i> es la extensión norte–sur de los 122 eventos que quedan al
-        excluir 7 eventos ubicados fuera de esa zona.</p>
-      <p style="margin-top:10px"><b>Límites que conviene decir en voz alta.</b>
-        (1) Las dos ventanas de medición no se solapan del todo, así que la caída de excesos entre
-        junio y el periodo del piloto es un hecho de los datos disponibles, no una relación de
-        causa probada. (2) La columna de distancia recorrida llega en cero en 28 de los 30
-        recorridos, por lo que aquí no se reportan kilómetros de operación. (3) El umbral de 60
-        km/h es el configurado en el reporte; cambiarlo cambia el conteo de eventos.
-        (4) La ubicación del corredor se describe a partir de las coordenadas del reporte: cada
-        punto del mapa enlaza a Google Maps para verificarlo.</p>
-      <p style="margin-top:10px"><b>Diseño de los gráficos.</b> Un color por vehículo, el mismo en
-        todo el tablero (la identidad no cambia entre gráficos). Paleta categórica verificada para
-        daltonismo, y todo valor legible también en las tablas: ningún dato depende del color ni
-        del cursor encima.</p>
-    </div>
   </section>
 
   <footer>
