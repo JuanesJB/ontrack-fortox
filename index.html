@@ -83,6 +83,32 @@
   .grid.top{align-items:start}
   @media (max-width:900px){.g2,.g3,.g4,.g21{grid-template-columns:1fr}}
 
+  /* ── TL;DR ──────────────────────────────────────────────── */
+  .tldr{margin-top:22px;background:linear-gradient(180deg,#f4fbf5,var(--surface) 62%);
+    border:1px solid #cfe9d4;border-radius:var(--r);padding:18px 22px 20px}
+  .tldr-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .tldr-h .tag{font-family:var(--accent);font-weight:800;font-size:11px;letter-spacing:.8px;
+    color:#fff;background:var(--green);border-radius:7px;padding:3px 9px}
+  .tldr-h h2{font-family:var(--accent);font-weight:800;font-size:18px;letter-spacing:-.2px}
+  .tldr ul{list-style:none;display:grid;gap:9px}
+  .tldr li{display:grid;grid-template-columns:130px minmax(0,1fr);gap:14px;align-items:baseline;
+    padding-bottom:9px;border-bottom:1px solid #e3f0e6}
+  .tldr li:last-of-type{border-bottom:none;padding-bottom:0}
+  .tldr .k{font-family:var(--accent);font-weight:800;font-size:19px;line-height:1.1;
+    color:var(--green-deep);text-align:right}
+  .tldr .k small{display:block;font-family:var(--sans);font-size:10.5px;font-weight:700;
+    color:var(--muted);letter-spacing:.2px;margin-top:2px}
+  .tldr .t{font-size:13.6px;color:var(--ink-2);line-height:1.5}
+  .tldr .t b{color:var(--ink)}
+  .tldr .close{margin-top:14px;padding:11px 14px;background:var(--ink);color:#fff;border-radius:10px;
+    font-size:13.2px;font-weight:600;line-height:1.5}
+  .tldr .close b{font-family:var(--accent);font-weight:800;color:#8ef29a}
+  @media (max-width:640px){
+    .tldr li{grid-template-columns:1fr;gap:2px}
+    .tldr .k{text-align:left}
+    .tldr .k small{display:inline;margin-left:6px}
+  }
+
   /* ── Héroe ──────────────────────────────────────────────── */
   .hero{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:22px;align-items:center}
   @media (max-width:900px){.hero{grid-template-columns:1fr}}
@@ -227,6 +253,7 @@
   </header>
 
   <nav class="anchors" aria-label="Secciones">
+    <a href="#tldr">TL;DR</a>
     <a href="#resumen">Resumen</a>
     <a href="#operacion">Operación medida</a>
     <a href="#velocidad">Velocidad</a>
@@ -235,6 +262,47 @@
     <a href="#calidad">Calidad del dato</a>
     <a href="#valor">Qué habilita</a>
   </nav>
+
+  <!-- ══ 0. TL;DR ═════════════════════════════════════════ -->
+  <section id="tldr" class="tldr" style="scroll-margin-top:64px">
+    <div class="tldr-h">
+      <span class="tag">TL;DR</span>
+      <h2>Lo esencial del piloto, en cinco líneas</h2>
+    </div>
+    <ul>
+      <li>
+        <span class="k">30<small>recorridos medidos</small></span>
+        <span class="t">La operación quedó <b>medida y auditable</b>: <b>3 vehículos</b> y 18 días
+          con conductor, hora de inicio y fin, y 192,8 h de operación con cierre válido.</span>
+      </li>
+      <li>
+        <span class="k">129<small>excesos de velocidad</small></span>
+        <span class="t"><b>Excesos de velocidad documentados</b> con hora, lugar y duración, y
+          casi todos son del mismo vehículo: <b>125 de 129 son del DNT17F</b>. No es un problema
+          de flota, es un problema de un vehículo.</span>
+      </li>
+      <li>
+        <span class="k">93,8 %<small>en 2 franjas</small></span>
+        <span class="t">Los excesos se concentran en las <b>6 a.m. y las 4 p.m.</b> — los cambios
+          de turno. Es un patrón horario, con una hora concreta a la cual apuntar.</span>
+      </li>
+      <li>
+        <span class="k">12,5 km<small>de vía · 94,6 %</small></span>
+        <span class="t">122 de los 129 eventos caen en un mismo tramo de la <b>Autopista Norte,
+          entre Chía y Cajicá</b>, y <b>ocho puntos concentran el 59 %</b>: ocho lugares
+          concretos para señalizar y vigilar.</span>
+      </li>
+      <li>
+        <span class="k">3<small>fallas de registro</small></span>
+        <span class="t">El propio tablero las detecta: <b>28 de 30 recorridos llegan sin
+          distancia</b>, 4 trayectos quedaron sin cerrar (hasta 473 h) y 5 duraron menos de un
+          minuto. Es lo accionable de esta semana.</span>
+      </li>
+    </ul>
+    <p class="close"><b>En una frase:</b> con 3 vehículos el piloto ya produjo evidencia
+      suficiente para intervenir <b>un vehículo, dos franjas horarias y ocho puntos de vía</b>,
+      en lugar de hacer una campaña general para toda la operación.</p>
+  </section>
 
   <!-- ══ 1. RESUMEN ══════════════════════════════════════ -->
   <section id="resumen">
